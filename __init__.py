@@ -83,7 +83,8 @@ class TEST_PT_collections(sub_Panel):
     # 实例函数,实例化前不可用,第一个参数指向类实例
     def draw(self, context: Context):
         seleted_objs = context.selected_objects
-        collections = context.scene.collection.children
+        collections = [x for x in bpy.data.collections]
+        collections.append(context.scene.collection)
         colls = self.get_objects_collections(seleted_objs, collections)  # 调用实例函数
 
         layout = self.layout
@@ -126,9 +127,8 @@ class TEST_PT_op01(sub_Panel):
     def draw(self, context: Context):
         active_obj = context.active_object
         seleted_objs = context.selected_objects
-        collections = (
-            context.scene.collection.children
-        )  # TODO: 仅工作于根collection,内部套嵌对象不可用
+        collections = [x for x in bpy.data.collections]
+        collections.append(context.scene.collection)
 
         layout = self.layout
 
@@ -181,15 +181,17 @@ class MoveObjectToCollection(Operator):
             return {"CANCELLED"}
 
         data = bpy.data
-        collection = data.collections[self.target_name]
+        collections = [x for x in bpy.data.collections]
+        collections.append(context.scene.collection)
         objs = [data.objects[item.name] for item in self.obj_names]
 
+        collection = [x for x in collections if x.name == self.target_name][0]
         [
             collection.objects.link(obj)  # 利用列表生成式遍历执行添加任务
             for obj in objs
             if obj.name not in collection.objects
         ]
-        self.unlink_other_collections(data.collections, objs)  # 清除原链接关系
+        self.unlink_other_collections(collections, objs)  # 清除原链接关系
         return {"FINISHED"}
 
     def unlink_other_collections(self, collections, objects):
@@ -274,7 +276,7 @@ classes = [
 
 def register():
     [register_class(i) for i in classes]
-    
+
     # op 02 公共变量储存
     bpy.types.Scene.test_enum = EnumProperty(items=enum_items_collection, name="目标容器")
     # 所有的Scene类实例都会被注入test_enum属性,例 context.scene.test_enum
