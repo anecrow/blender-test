@@ -8,10 +8,10 @@ from bpy.types import Operator, Panel, Context
 from bpy.types import Collection
 
 # ### prop types ### #
-from bpy.props import StringProperty, BoolProperty, EnumProperty, CollectionProperty
+from bpy.props import StringProperty, EnumProperty, CollectionProperty
 
 # ### prop group ### #
-from bpy.types import PropertyGroup, Scene, PointerProperty
+from bpy.types import PropertyGroup, Scene
 
 
 #######################
@@ -59,7 +59,7 @@ class TEST_PT_selected(sub_Panel):
     def poll(cls, context):  # 检查函数
         seleted_objs = context.selected_objects
         check = len(seleted_objs) > 0
-        return check  # 返回值为空(含False)时,阻止本类实执行和实例化
+        return check  # 返回值为空(含False)时,阻止本类执行和实例化
 
     def draw(self, context: Context):
         seleted_objs = context.selected_objects
@@ -85,7 +85,8 @@ class TEST_PT_collections(sub_Panel):
         seleted_objs = context.selected_objects
         collections = [x for x in bpy.data.collections]
         collections.append(context.scene.collection)
-        colls = self.get_objects_collections(seleted_objs, collections)  # 调用实例函数
+        # 调用实例函数
+        colls = self.get_objects_collections(seleted_objs, collections)
 
         layout = self.layout
 
@@ -278,7 +279,7 @@ def register():
     [register_class(i) for i in classes]
 
     # op 02 公共变量储存
-    bpy.types.Scene.test_enum = EnumProperty(items=enum_items_collection, name="目标容器")
+    Scene.test_enum = EnumProperty(items=enum_items_collection, name="目标容器")
     # 所有的Scene类实例都会被注入test_enum属性,例 context.scene.test_enum
 
 
