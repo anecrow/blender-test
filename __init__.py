@@ -97,8 +97,6 @@ class TEST_PT_collections(sub_Panel):
 # 功能面板01
 # operator传参方式
 class TEST_PT_op01(sub_Panel):
-    """把所选对象移至激活对象同collection中"""
-
     bl_label = "operator01"
     bl_options = {"DEFAULT_CLOSED"}
 
