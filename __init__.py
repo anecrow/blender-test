@@ -97,30 +97,21 @@ class TEST_PT_collections(sub_Panel):
 # 功能面板01
 # operator传参方式
 class TEST_PT_op01(sub_Panel):
+    """把所选对象移至激活对象同collection中"""
+
     bl_label = "operator01"
     bl_options = {"DEFAULT_CLOSED"}
 
     def draw(self, context: Context):
-        from .utils import get_objects_collection
-
         active_obj = context.active_object
         seleted_objs = context.selected_objects
+        root_collection = context.scene.collection
 
-        # 获得已选择的object与collection的对应列表
-        obj_coll_list = get_objects_collection(context, seleted_objs)
         # 筛选得到当前激活的object对应colletion
-        active_obj_coll = [
-            object_collection[1]
-            for object_collection in obj_coll_list
-            if object_collection[0] is active_obj
-        ]
-        active_obj_coll = active_obj_coll[0]  # 只取第一项,有多个匹配时剩下的会被忽略
+        active_obj_colls = self.get_activeObj_collections(active_obj, root_collection)
+        active_obj_coll = active_obj_colls[0]  # 只取第一项,有多个匹配时剩下的会被忽略
 
         layout = self.layout
-
-        _layout = layout.column()
-        _layout.enabled = False  # disable效果
-        _layout.label(text="把所选对象移至激活对象同collection中")
 
         layout.label(text="已选对象:%d" % len(seleted_objs))  # %运算符
         layout.prop(active_obj_coll, "name", text="目标容器")
@@ -131,6 +122,15 @@ class TEST_PT_op01(sub_Panel):
         for obj in seleted_objs:
             # CollectionProperty类型使用add()添加并返回该元素
             op.obj_names.add().name = obj.name
+
+    def get_activeObj_collections(self, active_object, root_collection):
+        from .utils import nested_object_generator
+
+        return [
+            collection
+            for collection in nested_object_generator(root_collection, "children")
+            if active_object.name in collection.objects
+        ]
 
 
 class Prop_Name_Group(PropertyGroup):  # 自定义参数类型
